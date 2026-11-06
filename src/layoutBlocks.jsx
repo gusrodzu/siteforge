@@ -15,6 +15,7 @@ const radius = choice([['Sin bordes redondeados','none'],['Pequeño','small'],['
 const shadow = choice([['Sin sombra','none'],['Suave','soft'],['Media','medium'],['Pronunciada','strong']]);
 const border = choice([['Sin borde','none'],['Sutil','subtle'],['Marcado','strong']]);
 const visibility = choice([['Todos los dispositivos','all'],['Solo escritorio y tablet','desktop-tablet'],['Solo escritorio','desktop'],['Solo móvil','mobile'],['Ocultar en tablet','no-tablet']]);
+const mobileColumns = choice([['Apilado · 1 columna','one'],['2 columnas en móvil','two']]);
 const tabletColumns = choice([['Adaptación automática','auto'],['Una columna','one'],['Dos columnas','two']]);
 const cls = (...parts) => parts.filter(Boolean).join(' ');
 const zone = (Content, name) => <Content className={cls('sf-layout-zone',`sf-layout-zone-${name}`)} minEmptyHeight={80}/>;
@@ -47,27 +48,27 @@ export const layoutComponents = {
   },
   LayoutColumns2: {
     label:'Columnas · 2',
-    fields:{...commonFields,tabletColumns,ratio:choice([['50 / 50','equal'],['66 / 33','left'],['33 / 66','right'],['75 / 25','left-wide'],['25 / 75','right-wide']]),mobileOrder:choice([['Primera y segunda','normal'],['Segunda y primera','reverse']]),left:slot,right:slot},
-    defaultProps:{...commonDefaults,ratio:'equal',tabletColumns:'auto',mobileOrder:'normal',left:[],right:[]},
-    render:({ratio,mobileOrder,tabletColumns,...props})=><div className={base('columns',props,`sf-layout-tablet-${tabletColumns} sf-layout-cols-2 sf-layout-ratio-${ratio} sf-layout-mobile-${mobileOrder}`)}>{columnSlots(['left','right'],props)}</div>
+    fields:{...commonFields,tabletColumns,mobileColumns,ratio:choice([['50 / 50','equal'],['66 / 33','left'],['33 / 66','right'],['75 / 25','left-wide'],['25 / 75','right-wide']]),mobileOrder:choice([['Primera y segunda','normal'],['Segunda y primera','reverse']]),left:slot,right:slot},
+    defaultProps:{...commonDefaults,ratio:'equal',tabletColumns:'auto',mobileColumns:'one',mobileOrder:'normal',left:[],right:[]},
+    render:({ratio,mobileOrder,tabletColumns,mobileColumns,...props})=><div className={base('columns',props,`sf-layout-tablet-${tabletColumns} sf-layout-mobile-cols-${mobileColumns} sf-layout-cols-2 sf-layout-ratio-${ratio} sf-layout-mobile-${mobileOrder}`)}>{columnSlots(['left','right'],props)}</div>
   },
   LayoutColumns3: {
     label:'Columnas · 3',
-    fields:{...commonFields,tabletColumns,ratio:choice([['Iguales','equal'],['Centro amplio','center-wide'],['Primera amplia','first-wide']]),mobileOrder:choice([['Orden original','normal'],['Invertir orden','reverse']]),first:slot,second:slot,third:slot},
-    defaultProps:{...commonDefaults,ratio:'equal',tabletColumns:'auto',mobileOrder:'normal',first:[],second:[],third:[]},
-    render:({ratio,mobileOrder,tabletColumns,...props})=><div className={base('columns',props,`sf-layout-tablet-${tabletColumns} sf-layout-cols-3 sf-layout-ratio-${ratio} sf-layout-mobile-${mobileOrder}`)}>{columnSlots(['first','second','third'],props)}</div>
+    fields:{...commonFields,tabletColumns,mobileColumns,ratio:choice([['Iguales','equal'],['Centro amplio','center-wide'],['Primera amplia','first-wide']]),mobileOrder:choice([['Orden original','normal'],['Invertir orden','reverse']]),first:slot,second:slot,third:slot},
+    defaultProps:{...commonDefaults,ratio:'equal',tabletColumns:'auto',mobileColumns:'one',mobileOrder:'normal',first:[],second:[],third:[]},
+    render:({ratio,mobileOrder,tabletColumns,mobileColumns,...props})=><div className={base('columns',props,`sf-layout-tablet-${tabletColumns} sf-layout-mobile-cols-${mobileColumns} sf-layout-cols-3 sf-layout-ratio-${ratio} sf-layout-mobile-${mobileOrder}`)}>{columnSlots(['first','second','third'],props)}</div>
   },
   LayoutColumns4: {
     label:'Columnas · 4',
-    fields:{...commonFields,tabletColumns,mobileOrder:choice([['Orden original','normal'],['Invertir orden','reverse']]),first:slot,second:slot,third:slot,fourth:slot},
-    defaultProps:{...commonDefaults,mobileOrder:'normal',first:[],second:[],third:[],fourth:[]},
-    render:({mobileOrder,tabletColumns,...props})=><div className={base('columns',props,`sf-layout-tablet-${tabletColumns} sf-layout-cols-4 sf-layout-mobile-${mobileOrder}`)}>{columnSlots(['first','second','third','fourth'],props)}</div>
+    fields:{...commonFields,tabletColumns,mobileColumns,mobileOrder:choice([['Orden original','normal'],['Invertir orden','reverse']]),first:slot,second:slot,third:slot,fourth:slot},
+    defaultProps:{...commonDefaults,tabletColumns:'auto',mobileColumns:'one',mobileOrder:'normal',first:[],second:[],third:[],fourth:[]},
+    render:({mobileOrder,tabletColumns,mobileColumns,...props})=><div className={base('columns',props,`sf-layout-tablet-${tabletColumns} sf-layout-mobile-cols-${mobileColumns} sf-layout-cols-4 sf-layout-mobile-${mobileOrder}`)}>{columnSlots(['first','second','third','fourth'],props)}</div>
   },
   LayoutGrid: {
     label:'Cuadrícula de módulos',
-    fields:{...commonFields,tabletColumns,columns:choice([['2 columnas','2'],['3 columnas','3'],['4 columnas','4']]),content:slot},
-    defaultProps:{...commonDefaults,columns:'3',tabletColumns:'auto',content:[]},
-    render:({columns,tabletColumns,content:Content,...props})=><div className={base('grid',props,`sf-layout-tablet-${tabletColumns} sf-layout-grid-${columns}`)}>{zone(Content,'content')}</div>
+    fields:{...commonFields,tabletColumns,mobileColumns,columns:choice([['2 columnas','2'],['3 columnas','3'],['4 columnas','4']]),content:slot},
+    defaultProps:{...commonDefaults,columns:'3',tabletColumns:'auto',mobileColumns:'one',content:[]},
+    render:({columns,tabletColumns,mobileColumns,content:Content,...props})=><div className={base('grid',props,`sf-layout-tablet-${tabletColumns} sf-layout-mobile-cols-${mobileColumns} sf-layout-grid-${columns}`)}>{zone(Content,'content')}</div>
   },
   LayoutStack: {
     label:'Pila vertical',

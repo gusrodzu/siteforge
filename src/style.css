@@ -133,3 +133,14 @@ html{scroll-behavior:smooth}button:focus-visible,a:focus-visible,input:focus-vis
 .sf-pattern-item button{font-size:12px;cursor:pointer;padding:7px 9px;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc}
 .sf-pattern-panel footer{border-top:1px solid #e2e8f0;padding:16px 20px}
 @media(max-width:720px){.sf-editor-actions{gap:5px}.sf-editor-status{display:none}.sf-editor-tip{padding:8px}.sf-pattern-content{padding:14px}.sf-pattern-item{align-items:start;flex-direction:column}}
+
+/* v0.9 · Shared layouts, sync patterns, responsive overrides */
+.sf-layout-links{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 20px}
+.sf-global-layout{width:100%;min-width:0}
+.sf-global-layout .site-section{max-width:100%}
+.sf-pattern-buttons{display:flex;gap:5px;flex-wrap:wrap}
+@media(max-width:650px){
+ .sf-layout-columns.sf-layout-mobile-cols-two{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .sf-layout-grid.sf-layout-mobile-cols-two>.sf-layout-zone{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .sf-layout-columns.sf-layout-mobile-cols-two>.sf-layout-cell{min-width:0}
+}
