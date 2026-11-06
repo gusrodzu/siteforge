@@ -1,6 +1,6 @@
 {
   "name": "siteforge-studio",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "db:init": "node server/init-db.js",
     "db:migrate": "node server/migrate.js",
-    "check": "node --check server/index.js && node --check server/phase3.js && node --check server/phase4.js && node --check server/patterns.js && node --check shared/generator.js && node --test tests/*.test.js"
+    "check": "node --check server/index.js && node --check server/phase3.js && node --check server/phase4.js && node --check server/patterns.js && node --check server/layouts.js && node --check shared/generator.js && node --test tests/*.test.js"
   },
   "dependencies": {
     "@puckeditor/core": "*",
