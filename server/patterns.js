@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import {randomUUID} from 'node:crypto';
 import {query} from './db.js';
+import {resolveSyncedPatterns} from '../shared/patterns.js';
 
 export const patternsRouter=Router();
 const authenticated=(req,res,next)=>req.session?.userId?next():res.status(401).json({error:'Inicia sesión'});
@@ -25,3 +26,20 @@ patternsRouter.delete('/sites/:siteId/patterns/:patternId',authenticated,async(r
  const {siteId,patternId}=req.params;if(!validUUID(siteId)||!validUUID(patternId)||!await access(req.session.userId,siteId,true))return res.status(403).json({error:'Sin permiso'});
  const result=await query('DELETE FROM site_patterns WHERE id=$1 AND site_id=$2 RETURNING id',[patternId,siteId]);if(!result.rowCount)return res.status(404).json({error:'Patrón no encontrado'});res.json({ok:true});
 }catch(err){next(err)}});
+
+patternsRouter.put('/sites/:siteId/patterns/:patternId',authenticated,async(req,res,next)=>{try{
+ const {siteId,patternId}=req.params;
+ if(!validUUID(siteId)||!validUUID(patternId)||!await access(req.session.userId,siteId,true))return res.status(403).json({error:'Sin permiso'});
+ const {name,content}=req.body||{};
+ if(!validComponent(content)||typeof name!=='string'||!name.trim()||name.length>120)return res.status(400).json({error:'Patrón inválido'});
+ const payload=JSON.stringify(content);
+ if(payload.length>200_000)return res.status(413).json({error:'Patrón demasiado grande'});
+ const r=await query('UPDATE site_patterns SET name=$1,content=$2::jsonb WHERE site_id=$3 AND id=$4 RETURNING id,name,category,content,created_at',[name.trim(),payload,siteId,patternId]);
+ if(!r.rowCount)return res.status(404).json({error:'Patrón no encontrado'});
+ res.json(r.rows[0]);
+}catch(err){next(err)}});
+export async function hydrateSitePatterns(siteId,data){
+ if(!data||!Array.isArray(data.content))return data;
+ const r=await query('SELECT id,content FROM site_patterns WHERE site_id=$1',[siteId]);
+ return resolveSyncedPatterns(data,r.rows);
+}
