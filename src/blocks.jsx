@@ -14,4 +14,8 @@ export const config={
     FeatureGrid:{label:'Tarjetas de servicios',fields:{heading:{type:'text'},oneTitle:{type:'text'},oneBody:{type:'textarea'},twoTitle:{type:'text'},twoBody:{type:'textarea'},threeTitle:{type:'text'},threeBody:{type:'textarea'}},defaultProps:{heading:'Nuestros servicios',oneTitle:'Diseño',oneBody:'Creamos experiencias.',twoTitle:'Desarrollo',twoBody:'Construimos soluciones.',threeTitle:'Soporte',threeBody:'Te acompañamos.'},render:({heading,oneTitle,oneBody,twoTitle,twoBody,threeTitle,threeBody})=><section className="site-section"><h2>{heading}</h2><div className="feature-grid">{[[oneTitle,oneBody],[twoTitle,twoBody],[threeTitle,threeBody]].map(([t,b],i)=><article key={i}><div className="feature-number">0{i+1}</div><h3>{t}</h3><p>{b}</p></article>)}</div></section>}
   ,...extendedComponents,...layoutComponents}
 };
-export function SiteRender({data,theme,siteTitle}) {return <SiteFrame theme={theme} siteTitle={siteTitle}><main className="rendered-site"><Render config={config} data={data}/></main></SiteFrame>}
+export function SiteRender({data,theme,siteTitle,layouts={}}) {
+ const header=layouts?.header?.content?.length ? <Render config={config} data={layouts.header}/> : null;
+ const footer=layouts?.footer?.content?.length ? <Render config={config} data={layouts.footer}/> : null;
+ return <SiteFrame theme={theme} siteTitle={siteTitle} customHeader={header} customFooter={footer}><main className="rendered-site"><Render config={config} data={data}/></main></SiteFrame>;
+}
