@@ -8,7 +8,8 @@ import { query, pool } from './db.js';
 import pgSession from 'connect-pg-simple';
 import { phase3 } from './phase3.js';
 import { phase4 } from './phase4.js';
-import {patternsRouter} from './patterns.js';
+import {patternsRouter,hydrateSitePatterns} from './patterns.js';
+import {layoutsRouter,publishedLayouts} from './layouts.js';
 import {templateData,themePresets,defaultTheme,sanitizeTheme,templates} from '../shared/templates.js';
 const app=express();
 const origin=process.env.WEB_ORIGIN || 'http://localhost:5173';
@@ -30,6 +31,7 @@ const member=async(userId,orgId)=>{
 app.use('/api',phase3);
 app.use('/api',phase4);
 app.use('/api',patternsRouter);
+app.use('/api',layoutsRouter);
 app.get('/api/health',(_req,res)=>res.json({ok:true}));
 app.post('/api/login',async(req,res,next)=>{try{
   const {email,password}=req.body||{};
@@ -76,7 +78,7 @@ app.post('/api/sites/:siteId/pages',auth,async(req,res,next)=>{try{
 }catch(err){next(err)}});
 app.get('/api/pages/:id',auth,async(req,res,next)=>{try{
  const r=await query('SELECT p.id,p.title,p.slug,p.draft,p.published,m.role,s.id AS site_id,s.slug AS site_slug,o.slug AS organization_slug FROM pages p JOIN sites s ON s.id=p.site_id JOIN organizations o ON o.id=s.organization_id JOIN memberships m ON m.organization_id=o.id AND m.user_id=$2 WHERE p.id=$1',[req.params.id,req.session.userId]);
- if(!r.rowCount)return res.status(404).json({error:'Página no encontrada'});res.json(r.rows[0]);
+ if(!r.rowCount)return res.status(404).json({error:'Página no encontrada'});const page=r.rows[0];page.draft=await hydrateSitePatterns(page.site_id,page.draft);res.json(page);
 }catch(err){next(err)}});
 app.put('/api/pages/:id',auth,async(req,res,next)=>{try{
  const {data,publish=false}=req.body||{};
@@ -88,8 +90,8 @@ app.put('/api/pages/:id',auth,async(req,res,next)=>{try{
 // Public published pages only: never exposes drafts or other organizations' private content.
 app.get('/api/public/:organization/:site/:page',async(req,res,next)=>{try{
  const {organization,site,page}=req.params;
- const r=await query('SELECT p.title,p.published,s.title AS site_title,s.theme FROM pages p JOIN sites s ON s.id=p.site_id JOIN organizations o ON o.id=s.organization_id WHERE o.slug=$1 AND s.slug=$2 AND p.slug=$3 AND p.published IS NOT NULL',[organization,site,page]);
- if(!r.rowCount)return res.status(404).json({error:'No publicada'});res.json(r.rows[0]);
+ const r=await query('SELECT p.title,p.published,s.id AS site_id,s.title AS site_title,s.theme FROM pages p JOIN sites s ON s.id=p.site_id JOIN organizations o ON o.id=s.organization_id WHERE o.slug=$1 AND s.slug=$2 AND p.slug=$3 AND p.published IS NOT NULL',[organization,site,page]);
+ if(!r.rowCount)return res.status(404).json({error:'No publicada'});const publicPage=r.rows[0];publicPage.published=await hydrateSitePatterns(publicPage.site_id,publicPage.published);publicPage.layouts=await publishedLayouts(publicPage.site_id);res.json(publicPage);
 }catch(err){next(err)}});
 app.use((err,_req,res,_next)=>{console.error(err);if(err.code==='23505')return res.status(409).json({error:'El identificador ya existe'});res.status(500).json({error:'Error del servidor'});});
 app.listen(Number(process.env.API_PORT||4000),()=>console.log(`API en http://localhost:${process.env.API_PORT||4000}`));
