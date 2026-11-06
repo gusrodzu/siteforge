@@ -1,0 +1,36 @@
+{
+  "name": "siteforge-studio",
+  "version": "0.8.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node --watch server/index.js",
+    "dev:web": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "db:init": "node server/init-db.js",
+    "db:migrate": "node server/migrate.js",
+    "check": "node --check server/index.js && node --check server/phase3.js && node --check server/phase4.js && node --check server/patterns.js && node --check shared/generator.js && node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@puckeditor/core": "*",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "pg": "^8.13.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.1.0",
+    "connect-pg-simple": "^10.0.0",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "vite": "^6.1.0"
+  }
+}
