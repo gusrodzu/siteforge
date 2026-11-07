@@ -1,9 +1,20 @@
 name: SiteForge CI
+
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: siteforge-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -20,3 +31,31 @@ jobs:
         run: npm run check
       - name: Build React application
         run: npm run build
+
+  automerge:
+    name: Merge approved PR after passing checks
+    needs: validate
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login == 'gusrodzu' &&
+      contains(github.event.pull_request.labels.*.name, 'automerge')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Verify commit is still current and merge checked PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(gh api "repos/$GH_REPO/pulls/$PR_NUMBER" --jq '.head.sha')"
+          test "$actual_sha" = "$EXPECTED_SHA" || { echo "PR changed after validation; refusing merge."; exit 1; }
+          gh pr merge "$PR_NUMBER" --repo "$GH_REPO" --squash --delete-branch --match-head-commit "$EXPECTED_SHA"
